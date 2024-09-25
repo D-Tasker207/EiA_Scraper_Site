@@ -1,0 +1,9 @@
+
+# ignore virtual environment and driver files
+.venv/
+
+# ignore .env files
+.env
+
+# ignore any saved batches
+batch*/
