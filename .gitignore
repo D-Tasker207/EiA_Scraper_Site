@@ -1,6 +1,7 @@
 
-# ignore virtual environment and driver files
+# ignore virtual environment and pyhton cache files
 .venv/
+__pycache__/
 
 # ignore .env files
 .env

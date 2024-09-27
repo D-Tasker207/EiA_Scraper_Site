@@ -19,7 +19,7 @@ def start_driver():
     firefox_options.add_argument("--headless")
     return webdriver.Firefox(service=gecko_service, options=firefox_options)
 
-def main(dir_name, image_ids):
+def get_images(dir_name, image_ids):
     filename = f"{dir_name}/credits.txt"
     
     # Load env variables
@@ -134,4 +134,4 @@ if __name__ == '__main__':
 
     dir_name = f"batch_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     os.mkdir(dir_name)
-    main(dir_name, image_ids)
+    get_images(dir_name, image_ids)
