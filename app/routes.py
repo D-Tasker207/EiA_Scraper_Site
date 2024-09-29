@@ -1,5 +1,5 @@
 from flask import Blueprint, request, send_file, send_from_directory, jsonify
-from .socket import socketio
+from .socketio_handlers import socketIO
 from .services import start_image_scrape
 import os
 
@@ -8,10 +8,17 @@ main = Blueprint('main', __name__)
 @main.route('/', defaults={'path': ''})
 @main.route('/<path:path>')
 def serve_react(path):
-    if path and os.path.exists(os.path.join('static/dist', path)):
-        return send_from_directory('static/dist', path)
-    return send_from_directory('static/dist', 'index.html')
-    
+    dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static/dist'))
+
+    print(f'checking path {path}, got {os.path.exists(os.path.join(dist_dir, path))}')
+    if path and os.path.exists(os.path.join(dist_dir, path)):
+        return send_from_directory(dist_dir, path)
+
+    return send_from_directory(dist_dir, 'index.html')
+
+@main.route('/static-test')
+def serve_static():
+    return send_from_directory('../static/dist', 'bundle.js')
 
 @main.route('/api/mgn_scrape', methods=['POST'])
 def start_mgn_scrape():
