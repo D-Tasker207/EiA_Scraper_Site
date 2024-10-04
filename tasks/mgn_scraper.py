@@ -1,9 +1,7 @@
-import argparse
 import requests
-import platform
 import os
 import time
-from datetime import datetime
+import tempfile 
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -13,27 +11,50 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.firefox import GeckoDriverManager
 
+from app.socketio_handlers import Progress, send_error
+
 def start_driver():
     gecko_service = Service(GeckoDriverManager().install())
     firefox_options = webdriver.FirefoxOptions()
     firefox_options.add_argument("--headless")
     return webdriver.Firefox(service=gecko_service, options=firefox_options)
 
-def main(dir_name, image_ids):
-    filename = f"{dir_name}/credits.txt"
+def get_images(sid, image_ids):
+    """
+    Steps:
+    1. Start driver
+    2. Go to MGN website
+    3. Login
+    4. Loop through image ids
+    4.1 Search for image id
+    4.2 Find image credit
+    4.3 Save image
+    5. Close driver
+    """
+
+    # Set up progress
+    total_steps = len(image_ids) * 2 + 4
+    progress_tracker = Progress(sid, total_steps)
+
+    temp_dir = tempfile.mkdtemp() 
+
+    # Create credits file
+    credit_file = f"{temp_dir}/credits.txt"
     
     # Load env variables
     load_dotenv()
     USERNAME = os.getenv("MGN_USERNAME")
     PASSWORD = os.getenv("MGN_PASSWORD")
 
+    # Start driver
+    progress_tracker.update("Starting driver")
     driver = start_driver()
     driver.get("https://new.mgnonline.com/")
 
     # Login
+    progress_tracker.update("Logging in")
     login_btn = driver.find_element(By.LINK_TEXT, "log in")
     assert login_btn is not None
-    print("Logging In")
     login_btn.click()
     username_input = driver.find_element(By.ID, "username")
     password_input = driver.find_element(By.ID, "password")
@@ -42,13 +63,12 @@ def main(dir_name, image_ids):
     driver.find_element(By.ID, "btnLogin2").click()
 
     assert driver.find_element(By.LINK_TEXT, "log out") is not None
-    print("Credentials accepted")
 
     main_tab = driver.current_window_handle
 
     # Loop through image ids
-    for image_id in image_ids:
-        print(f"\nScraping image {image_id}")
+    for i, image_id in enumerate(image_ids):
+        progress_tracker.update(f"{i}/{len(image_ids)}: Finding image: {image_id}")
         current_url = driver.current_url
         search_bar = driver.find_element(By.ID, "searchTerm")
         search_bar.clear()
@@ -65,6 +85,7 @@ def main(dir_name, image_ids):
             assert driver.find_element(By.XPATH, "//div[contains(text(), 'Image Id: ')]") is not None
 
         # Find image credit
+        progress_tracker.update(f"{i}/{len(image_ids)}: Saving image credit: {image_id}")
         try:
             credit = driver.execute_script("""
                 var creditSpan = document.querySelector('span.credit');
@@ -73,16 +94,15 @@ def main(dir_name, image_ids):
                 }
                 return '';
             """)            
-            print(f"Found image credit: {credit}")
-            with open(filename, "a") as f:
+            with open(credit_file, "a") as f:
                 f.write(f"{image_id}: {credit}\n")
         except Exception as e:
-            print(f"Error finding image credit: {e}")
-            with open(filename, "a") as f:
+            send_error(f"{i}/{len(image_ids)}: Error finding image credit: {e}")
+            with open(credit_file, "a") as f:
                 f.write(f"{image_id}: Error finding credit\n")
 
         # Save Image
-        print("Saving image")
+        progress_tracker.update(f"{i}/{len(image_ids)} Saving image")
         try:
             # Open image in new tab
             time.sleep(1)
@@ -108,30 +128,20 @@ def main(dir_name, image_ids):
             # Download the image
             response = requests.get(image_src, headers=headers, cookies=cookies)
             if response.status_code == 200:
-                with open(f"{dir_name}/{image_id}.jpg", "wb") as f:
+                with open(f"{temp_dir}/{image_id}.jpg", "wb") as f:
                     f.write(response.content)
             else:
-                print(f"Failed to download image, status code: {response.status_code}")
+                send_error(f"{i}/{len(image_ids)}: Failed to download image, status code: {response.status_code}")
 
             # Close image tab
             driver.close()
             driver.switch_to.window(main_tab)
         except Exception as e:
-            print(f"Error: {e}")
+            send_error(f"{i}/{len(image_ids)}: Error: {e}")
             driver.quit()
             exit()
 
-    print(f"All images downloaded and can be found in: {dir_name}/")
+    progress_tracker.update("Cleaning Up")
     driver.quit()
-        
-if __name__ == '__main__':
-    # Get cli arguments
-    parser = argparse.ArgumentParser(description='Scrape MGN website')
-    parser.add_argument('-l', '--list', help='List of image ids to scrape', type=str)
 
-    args = parser.parse_args() 
-    image_ids = [int(item) for item in args.list.split(",")]
-
-    dir_name = f"batch_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-    os.mkdir(dir_name)
-    main(dir_name, image_ids)
+    return temp_dir
