@@ -24,7 +24,7 @@ function App() {
         {downloadLink && (
           <div>
             <h3>Your Download is Ready:</h3>
-            <a href={download_link} download="images.zip">
+            <a href={downloadLink} download="images.zip">
               <button>Download</button>
             </a>
           </div>
