@@ -4,13 +4,15 @@ const MgnScraperForm = ({ handleSubmit, data, setData, error }) => {
     return (
         <form onSubmit={handleSubmit}>
             <div>
-                <input
+                <textarea
                     type="text"
                     name="image_ids"
-                    value={image_ids}
+                    value={data}
                     onChange={(e) => setData(e.target.value)}
-                    placeholder="Enter URL"
+                    placeholder="Enter Image IDs"
                     required
+                    rows="4"
+                    cols="40"
                 />
             </div>
             <button type="submit">Submit</button>

@@ -9,11 +9,11 @@ module.exports = (env, argv) => {
         output: {
             path: path.resolve(__dirname, 'static/dist'),
             filename: 'bundle.js',
-            publicPath: '/static/'
+            publicPath: '/static/dist/'
         },
 
         devServer: {
-            static: path.join(__dirname, 'static'),
+            static: path.join(__dirname, 'static/dist'),
             compress: true,
             port: 3000,
             historyApiFallback: true,

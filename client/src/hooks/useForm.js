@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { submitForm } from '../services/api';
+import { connectSocket, getSocketId, disconnectSocket } from '../services/websocket';
 
 const useForm = () => {
     const [data, setData] = useState('');
+    const [message, setMessage] = useState('');
+    const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
+    const [downloadLink, setDownloadLink] = useState('');
 
     const validate = () => {
         if(!data) {
@@ -16,6 +20,7 @@ const useForm = () => {
             setError('Invalid ID sequence: please entered comma separated 6 digit ID numbers');
             return false;
         }
+        return true;
     }
 
     const handleSubmit = async (e) => {
@@ -25,16 +30,27 @@ const useForm = () => {
         if(!validate()) return;
 
         try {
-            const result = await submitForm({ data });
-            setMessage(result.message);
-        } catch (error) {
+            await connectSocket(setProgress, setMessage, setDownloadLink);
+            const sid = getSocketId();
+
+            if(!sid) {
+                throw new Error('Failed to connect to websocket');
+            }
+            
+            const result = await submitForm({ data, sid });
+            // setMessage(result.message);
+        } catch (err) {
             setError(err.message || 'An error occurred');
+            disconnectSocket();
         }
     };
 
     return {
         data,
         setData,
+        message,
+        progress,
+        downloadLink,
         error,
         handleSubmit
     };
