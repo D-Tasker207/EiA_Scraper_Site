@@ -41,12 +41,12 @@ def start_mgn_scrape():
 
     return jsonify({'message': 'Scraping started successfully'}), 200
 
-@main.route('/api/download/<filename>', methods=['GET'])
+@main.route('/api/download/<task_id>', methods=['GET'])
 def download(task_id):
     zip_path = zip_files[task_id]
     if not zip_path or not os.path.exists(zip_path):
         return jsonify({'message': 'File not found'}), 404
-    response = send_file(zip_path, as_attachment=True, attachment_filename='images.zip')
-    delete_temp_files(zip_path)
+    response = send_file(zip_path, as_attachment=True)
+    delete_temp_files(task_id)
     
     return response

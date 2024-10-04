@@ -13,5 +13,5 @@ def create_zip_file(sid, temp_dir):
                 progress_tracker.update(f"Zipping {file}")
                 zipf.write(os.path.join(root, file), file)
 
+    progress_tracker.update("Zipping complete")
     return zip_path
-    

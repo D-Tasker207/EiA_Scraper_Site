@@ -20,6 +20,7 @@ def start_image_scrape(sid, image_ids, task_id):
 
 def delete_temp_files(task_id, delay=30):
     def delayed_delete():
+        print(f"Waiting {delay} seconds to delete {task_id} files")
         time.sleep(delay)
         zip_path = zip_files.pop(task_id, None)
         if zip_path:

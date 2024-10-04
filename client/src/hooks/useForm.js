@@ -32,6 +32,7 @@ const useForm = () => {
         try {
             await connectSocket(setProgress, setMessage, setDownloadLink);
             const sid = getSocketId();
+            setDownloadLink('');
 
             if(!sid) {
                 throw new Error('Failed to connect to websocket');

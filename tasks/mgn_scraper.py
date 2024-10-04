@@ -68,7 +68,7 @@ def get_images(sid, image_ids):
 
     # Loop through image ids
     for i, image_id in enumerate(image_ids):
-        progress_tracker.update(f"{i}/{len(image_ids)}: Finding image: {image_id}")
+        progress_tracker.update(f"{i+1}/{len(image_ids)}: Finding image: {image_id}")
         current_url = driver.current_url
         search_bar = driver.find_element(By.ID, "searchTerm")
         search_bar.clear()
@@ -85,7 +85,7 @@ def get_images(sid, image_ids):
             assert driver.find_element(By.XPATH, "//div[contains(text(), 'Image Id: ')]") is not None
 
         # Find image credit
-        progress_tracker.update(f"{i}/{len(image_ids)}: Saving image credit: {image_id}")
+        progress_tracker.update(f"{i+1}/{len(image_ids)}: Saving image credit: {image_id}")
         try:
             credit = driver.execute_script("""
                 var creditSpan = document.querySelector('span.credit');
@@ -97,12 +97,12 @@ def get_images(sid, image_ids):
             with open(credit_file, "a") as f:
                 f.write(f"{image_id}: {credit}\n")
         except Exception as e:
-            send_error(f"{i}/{len(image_ids)}: Error finding image credit: {e}")
+            send_error(f"{i+1}/{len(image_ids)}: Error finding image credit: {e}")
             with open(credit_file, "a") as f:
                 f.write(f"{image_id}: Error finding credit\n")
 
         # Save Image
-        progress_tracker.update(f"{i}/{len(image_ids)} Saving image")
+        progress_tracker.update(f"{i+1}/{len(image_ids)} Saving image")
         try:
             # Open image in new tab
             time.sleep(1)
@@ -131,13 +131,13 @@ def get_images(sid, image_ids):
                 with open(f"{temp_dir}/{image_id}.jpg", "wb") as f:
                     f.write(response.content)
             else:
-                send_error(f"{i}/{len(image_ids)}: Failed to download image, status code: {response.status_code}")
+                send_error(f"{i+1}/{len(image_ids)}: Failed to download image, status code: {response.status_code}")
 
             # Close image tab
             driver.close()
             driver.switch_to.window(main_tab)
         except Exception as e:
-            send_error(f"{i}/{len(image_ids)}: Error: {e}")
+            send_error(f"{i+1}/{len(image_ids)}: Error: {e}")
             driver.quit()
             exit()
 
