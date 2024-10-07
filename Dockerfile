@@ -55,4 +55,4 @@ RUN pip install gunicorn
 EXPOSE 5000
 
 # Start the Flask app using Gunicorn
-CMD ["gunicorn", "--worker-class", "gthread", "--bind", "0.0.0.0:5000", "--threads", "4", "run:app"]
+CMD ["gunicorn", "--worker-class", "gthread", "--bind", "0.0.0.0:5000", "--threads", "2", "run:app"]

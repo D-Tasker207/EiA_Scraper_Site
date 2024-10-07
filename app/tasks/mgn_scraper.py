@@ -10,8 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.firefox import GeckoDriverManager
-
-from app.socketio_handlers import Progress, send_error
+from selenium.webdriver.common.action_chains import ActionChains
+from app.socketio_handlers import Progress, send_error, send_message
 
 def start_driver():
     gecko_service = Service(GeckoDriverManager().install())
@@ -49,6 +49,7 @@ def get_images(sid, image_ids):
     # Start driver
     progress_tracker.update("Starting driver")
     driver = start_driver()
+    driver.set_window_size(1920, 1080)
     driver.get("https://new.mgnonline.com/")
 
     # Login
@@ -75,14 +76,23 @@ def get_images(sid, image_ids):
         search_bar.send_keys(image_id)
         search_bar.send_keys(Keys.RETURN)
         
-        WebDriverWait(driver, 10).until(EC.url_changes(current_url))
+        try:
+            WebDriverWait(driver, 10).until(EC.url_changes(current_url))
+        except:
+            send_error(sid, f"{i+1}/{len(image_ids)}: URL did not change after searching for image: {image_id}")
+            continue
 
         # If image details don't appear, click on the image after 2 seconds
         try:
-            WebDriverWait(driver, 5).until(lambda driver: driver.find_element(By.XPATH, "//div[contains(text(), 'Image Id: ')]"))
+            WebDriverWait(driver, 10).until(lambda driver: driver.find_element(By.XPATH, "//div[contains(text(), 'Image Id: ')]"))
+            # driver.find_element(By.XPATH, "//ul[@id='og-grid']//li[2]").click()
         except:
             driver.find_element(By.XPATH, "//ul[@id='og-grid']//li[2]").click()
-            assert driver.find_element(By.XPATH, "//div[contains(text(), 'Image Id: ')]") is not None
+            image_id_box = driver.find_element(By.XPATH, "//div[contains(text(), 'Image Id: ')]") is not None
+            assert driver.execute_script(
+            "var elem = arguments[0], box = elem.getBoundingClientRect();"
+            "return (box.top >= 0 && box.left >= 0 && box.bottom <= window.innerHeight && box.right <= window.innerWidth);",
+            image_id_box) is True
 
         # Find image credit
         progress_tracker.update(f"{i+1}/{len(image_ids)}: Saving image credit: {image_id}")
@@ -102,13 +112,12 @@ def get_images(sid, image_ids):
                 f.write(f"{image_id}: Error finding credit\n")
 
         # Save Image
-        progress_tracker.update(f"{i+1}/{len(image_ids)} Saving image")
+        progress_tracker.update(f"{i+1}/{len(image_ids)} Saving image: {image_id}")
         try:
             # Open image in new tab
             time.sleep(1)
             element = driver.find_element(By.CSS_SELECTOR, "i.fa.fa-file-image-o.mgntool[title='View File']")
-            driver.execute_script("arguments[0].scrollIntoView(true);", element)
-            element.click()
+            driver.execute_script("arguments[0].click();", element)
 
             driver.switch_to.window(driver.window_handles[1])
             time.sleep(1)
@@ -131,13 +140,15 @@ def get_images(sid, image_ids):
                 with open(f"{temp_dir}/{image_id}.jpg", "wb") as f:
                     f.write(response.content)
             else:
-                send_error(sid, f"{i+1}/{len(image_ids)}: Failed to download image, status code: {response.status_code}")
+                raise Exception(response.status_code)
 
             # Close image tab
             driver.close()
             driver.switch_to.window(main_tab)
         except Exception as e:
+            driver.save_screenshot(f"{temp_dir}/{image_id}_error.png")
             send_error(sid, f"{i+1}/{len(image_ids)}: Error: {e}")
+            continue
 
     progress_tracker.update("Cleaning Up")
     driver.quit()

@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 
 let socket;
 
-export const connectSocket = (setProgress, setMessage, setDownloadLink) => {
+export const connectSocket = (setProgress, setMessage, setError, setDownloadLink) => {
     return new Promise((resolve, reject) => {
         if(socket && socket.connected) {
             resolve(socket.id);
@@ -16,6 +16,13 @@ export const connectSocket = (setProgress, setMessage, setDownloadLink) => {
                     console.log('Progress:', data);
                     if(setProgress) {
                         setProgress(data);
+                    }
+                });
+
+                socket.on('error', (data) => {
+                    console.log('Error:', data);
+                    if(setError) {
+                        setMessage(data);
                     }
                 });
             
