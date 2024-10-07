@@ -10,7 +10,7 @@ __pycache__/
 batch*/
 
 # dependencies
-/node_modules
+*/node_modules
 */.pnp
 *.pnp.js
 
@@ -19,7 +19,7 @@ batch*/
 
 # production
 */build
-*/dist
+**/dist
 
 # misc
 .DS_Store

@@ -47,6 +47,6 @@ def download(task_id):
     if not zip_path or not os.path.exists(zip_path):
         return jsonify({'message': 'File not found'}), 404
     response = send_file(zip_path, as_attachment=True)
-    delete_temp_files(task_id)
+    delete_temp_files(zip_files, task_id)
     
     return response

@@ -5,7 +5,7 @@ const { optimize } = require('webpack');
 module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
     return {
-        entry: './client/src/index.js',
+        entry: './src/index.js',
         output: {
             path: path.resolve(__dirname, 'static/dist'),
             filename: 'bundle.js',
@@ -13,7 +13,7 @@ module.exports = (env, argv) => {
         },
 
         devServer: {
-            static: path.join(__dirname, 'static/dist'),
+            static: path.join(__dirname, 'di/static/dist'),
             compress: true,
             port: 3000,
             historyApiFallback: true,
@@ -62,7 +62,7 @@ module.exports = (env, argv) => {
 
         plugins: [
             new HtmlWebpackPlugin({
-                template: './client/public/index.html'
+                template: './public/index.html'
             }),
         ],
 

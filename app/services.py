@@ -1,6 +1,6 @@
 from .socketio_handlers import send_message, send_url, client_disconnect
-from tasks.mgn_scraper import get_images
-from tasks.zip_files import create_zip_file
+from app.tasks.mgn_scraper import get_images
+from app.tasks.utils import create_zip_file, delete_temp_files
 from .shared import zip_files
 import os
 import shutil
@@ -17,14 +17,3 @@ def start_image_scrape(sid, image_ids, task_id):
     download_url = f"/api/download/{task_id}"
     send_url(sid, download_url)
     client_disconnect(sid)
-
-def delete_temp_files(task_id, delay=30):
-    def delayed_delete():
-        print(f"Waiting {delay} seconds to delete {task_id} files")
-        time.sleep(delay)
-        zip_path = zip_files.pop(task_id, None)
-        if zip_path:
-            temp_dir = os.path.dirname(zip_path)
-            shutil.rmtree(temp_dir)
-            print(f"Deleted {temp_dir} for task {task_id}")
-    threading.Thread(target=delayed_delete).start()
