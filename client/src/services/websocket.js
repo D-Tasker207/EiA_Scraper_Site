@@ -7,7 +7,7 @@ export const connectSocket = (setProgress, setMessage, setDownloadLink) => {
         if(socket && socket.connected) {
             resolve(socket.id);
         } else {
-            socket = io('http://localhost:5000', { timeout: 5000 });
+            socket = io();
 
             socket.on('connect', () => {
                 console.log('Websocket connected, socket id:', socket.id);

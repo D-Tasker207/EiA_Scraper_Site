@@ -29,7 +29,12 @@ ENV PYTHONPATH=/app
 WORKDIR /webserver
 
 # Install backend build dependencies
-RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    firefox-esr \
+    wget \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
@@ -50,4 +55,4 @@ RUN pip install gunicorn
 EXPOSE 5000
 
 # Start the Flask app using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "--worker-class", "gthread", "--bind", "0.0.0.0:5000", "--threads", "4", "run:app"]

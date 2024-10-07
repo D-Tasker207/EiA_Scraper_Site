@@ -97,7 +97,7 @@ def get_images(sid, image_ids):
             with open(credit_file, "a") as f:
                 f.write(f"{image_id}: {credit}\n")
         except Exception as e:
-            send_error(f"{i+1}/{len(image_ids)}: Error finding image credit: {e}")
+            send_error(sid, f"{i+1}/{len(image_ids)}: Error finding image credit: {e}")
             with open(credit_file, "a") as f:
                 f.write(f"{image_id}: Error finding credit\n")
 
@@ -131,15 +131,13 @@ def get_images(sid, image_ids):
                 with open(f"{temp_dir}/{image_id}.jpg", "wb") as f:
                     f.write(response.content)
             else:
-                send_error(f"{i+1}/{len(image_ids)}: Failed to download image, status code: {response.status_code}")
+                send_error(sid, f"{i+1}/{len(image_ids)}: Failed to download image, status code: {response.status_code}")
 
             # Close image tab
             driver.close()
             driver.switch_to.window(main_tab)
         except Exception as e:
-            send_error(f"{i+1}/{len(image_ids)}: Error: {e}")
-            driver.quit()
-            exit()
+            send_error(sid, f"{i+1}/{len(image_ids)}: Error: {e}")
 
     progress_tracker.update("Cleaning Up")
     driver.quit()

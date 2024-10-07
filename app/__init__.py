@@ -19,6 +19,7 @@ def create_app():
     else:
         app.config['DEBUG'] = False
         app.config['ENV'] = 'production'
-        socketio.init_app(app)
+        #CORS(app, resources={r"/*": {"origins": "http://localhost:5000"}})
+        socketio.init_app(app)# cors_allowed_origins="http://localhost:5000")
 
     return app
