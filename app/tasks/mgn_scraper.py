@@ -33,7 +33,7 @@ def get_images(sid, image_ids):
     """
 
     # Set up progress
-    total_steps = len(image_ids) * 2 + 4
+    total_steps = len(image_ids) * 3 + 4
     progress_tracker = Progress(sid, total_steps)
 
     temp_dir = tempfile.mkdtemp() 

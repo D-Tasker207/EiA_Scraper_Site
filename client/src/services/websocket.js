@@ -13,28 +13,28 @@ export const connectSocket = (setProgress, setMessage, setError, setDownloadLink
                 console.log('Websocket connected, socket id:', socket.id);
                 
                 socket.on('progress', (data) => {
-                    console.log('Progress:', data);
+                    // console.log('Progress:', data);
                     if(setProgress) {
                         setProgress(data);
                     }
                 });
 
                 socket.on('error', (data) => {
-                    console.log('Error:', data);
+                    // console.log('Error:', data);
                     if(setError) {
                         setMessage(data);
                     }
                 });
             
                 socket.on('message', (data) => {
-                    console.log('Message:', data);
+                    // console.log('Message:', data);
                     if(setMessage) {
                         setMessage(data);
                     }
                 });
 
                 socket.on('url', (data) => {
-                    console.log('Download Link:', data);
+                    // console.log('Download Link:', data);
                     if(setDownloadLink) {
                         setDownloadLink(data);
                     }

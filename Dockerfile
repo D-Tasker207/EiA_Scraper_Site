@@ -21,23 +21,23 @@ RUN npm run build
 FROM python:3.11-slim AS final
 
 # Set environment variables for Flask
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app 
 
 # Set working directory for the backend
 WORKDIR /webserver
 
+COPY requirements.txt ./
+
 # Install backend build dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
     firefox-esr \
-    wget \
     xvfb \
-    && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install gunicorn
 
 # Copy backend source code & resources
 COPY app/ ./app/
@@ -47,9 +47,6 @@ COPY --from=frontend-build /app/client/static/dist ./app/static/dist/
 
 # Copy the entrypoint script
 COPY run.py ./
-
-# Install Gunicorn to run the Flask app
-RUN pip install gunicorn
 
 # Expose the port Flask will run on (container's internal port)
 EXPOSE 5000
