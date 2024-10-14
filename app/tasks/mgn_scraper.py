@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.action_chains import ActionChains
-from app.socketio_handlers import Progress, send_error, send_message
+from app.socketio_handlers import Progress, send_error
 
 def start_driver():
     gecko_service = Service(GeckoDriverManager().install())

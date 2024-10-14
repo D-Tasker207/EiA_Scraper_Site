@@ -3,7 +3,7 @@ import os
 import time
 import shutil
 import threading
-from app.socketio_handlers import Progress, send_error
+from app.socketio_handlers import Progress
 
 def create_zip_file(sid, temp_dir):
     zip_path = os.path.join(temp_dir, "images.zip")
