@@ -2,32 +2,39 @@ import io from 'socket.io-client';
 
 let socket;
 
-export const connectSocket = (setProgress, setMessage, setDownloadLink) => {
+export const connectSocket = (setProgress, setMessage, setError, setDownloadLink) => {
     return new Promise((resolve, reject) => {
         if(socket && socket.connected) {
             resolve(socket.id);
         } else {
-            socket = io('http://localhost:5000', { timeout: 5000 });
+            socket = io();
 
             socket.on('connect', () => {
                 console.log('Websocket connected, socket id:', socket.id);
                 
                 socket.on('progress', (data) => {
-                    console.log('Progress:', data);
+                    // console.log('Progress:', data);
                     if(setProgress) {
                         setProgress(data);
                     }
                 });
+
+                socket.on('error', (data) => {
+                    // console.log('Error:', data);
+                    if(setError) {
+                        setMessage(data);
+                    }
+                });
             
                 socket.on('message', (data) => {
-                    console.log('Message:', data);
+                    // console.log('Message:', data);
                     if(setMessage) {
                         setMessage(data);
                     }
                 });
 
                 socket.on('url', (data) => {
-                    console.log('Download Link:', data);
+                    // console.log('Download Link:', data);
                     if(setDownloadLink) {
                         setDownloadLink(data);
                     }

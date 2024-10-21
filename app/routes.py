@@ -10,7 +10,7 @@ main = Blueprint('main', __name__)
 @main.route('/', defaults={'path': ''})
 @main.route('/<path:path>')
 def serve_react(path):
-    dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static/dist'))
+    dist_dir = os.path.join(os.getcwd(), 'app/static/dist')
     
     print(f'checking path {path}, got {os.path.join(dist_dir, path)}')
     if path and os.path.exists(os.path.join(dist_dir, path)):
@@ -47,6 +47,6 @@ def download(task_id):
     if not zip_path or not os.path.exists(zip_path):
         return jsonify({'message': 'File not found'}), 404
     response = send_file(zip_path, as_attachment=True)
-    delete_temp_files(task_id)
+    delete_temp_files(zip_files, task_id)
     
     return response

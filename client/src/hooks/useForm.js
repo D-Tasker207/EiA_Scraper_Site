@@ -30,7 +30,7 @@ const useForm = () => {
         if(!validate()) return;
 
         try {
-            await connectSocket(setProgress, setMessage, setDownloadLink);
+            await connectSocket(setProgress, setMessage, setError, setDownloadLink);
             const sid = getSocketId();
             setDownloadLink('');
 
